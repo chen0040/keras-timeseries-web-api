@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+    <img src="/images/{{ filename }}" />
+    <br />
+    <hr />
+    Below is my top 3 guesses of what is inside your picture:
+    <ol>
+    {% for pred in top3 %}
+        <li>{{ pred[1] }} ({{ pred[2] }})</li>
+    {% endfor %}
+    </ol>
+    <hr />
+    <a href="{{ url_for('vgg19') }}">Try another picture</a>
+{% endblock %}

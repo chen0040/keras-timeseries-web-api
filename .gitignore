@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+.idea/
+target/
+keras_timeseries_web/uploads
+*.iml
+
+
 # Distribution / packaging
 .Python
 env/

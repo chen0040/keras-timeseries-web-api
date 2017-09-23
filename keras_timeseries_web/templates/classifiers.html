@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=entries>
+    <li><a href="{{ url_for('cats_vs_dogs') }}">Cats vs Dogs</a></li>
+    <li><a href="{{ url_for('cifar10') }}">CIFAR-10</a></li>
+    <li><a href="{{ url_for('vgg16') }}">VGG-16</a></li>
+    <li><a href="{{ url_for('vgg19') }}">VGG-19</a></li>
+  </ul>
+{% endblock %}
