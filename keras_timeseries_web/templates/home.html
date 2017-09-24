@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% block body %}
+  <ul class=entries>
+    <li><a href="{{ url_for('timeseries') }}">Timeseries Forecasting</a></li>
+    <li><a href="{{ url_for('periodic_timeseries') }}">Periodic Timeseries Forecasting</a></li>
+  </ul>
+{% endblock %}
