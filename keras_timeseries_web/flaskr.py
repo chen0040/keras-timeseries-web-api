@@ -5,6 +5,8 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
     render_template, flash
 from flask import send_from_directory
 from werkzeug.utils import secure_filename
+from keras_timeseries_web.milk_timeseries_stateless_predictor import MilkStateless
+from keras_timeseries_web.milk_timeseries_stateful_predictor import MilkStateful
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -38,6 +40,12 @@ app.config.update(
 )
 celery = make_celery(app)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+milkStateful = MilkStateful()
+milkStateless = MilkStateless()
+
+# milkStateful.test_run()
+milkStateless.test_run()
 
 
 @app.route('/')
@@ -73,18 +81,15 @@ def about():
     return 'about us'
 
 
-@app.route('/timeseries', methods=['GET', 'POST'])
-def cats_vs_dogs():
-    if request.method == 'POST':
-        return store_uploaded_file('timeseries_result')
-    return render_template('timeseries.html')
+@app.route('/milk_timeseries_stateless', methods=['GET'])
+def milk_timeseries_stateless():
+    return render_template('milk_timeseries_stateless.html', output=milkStateless.test_run())
 
 
 
-@app.route('/timeseries_result/<filename>')
-def cifar10_result(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    return render_template('timeseries_result.html', filename=filename)
+@app.route('/milk_timeseries_stateful')
+def milk_timeseries_stateful():
+    return render_template('milk_timeseries_stateful.html', output=milkStateless.test_run())
 
 
 
