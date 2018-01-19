@@ -1,12 +1,10 @@
 import os
 
 from celery import Celery
-from flask import Flask, request, session, g, redirect, url_for, abort, \
-    render_template, flash
-from flask import send_from_directory
+from flask import Flask, request, redirect, url_for, render_template, flash
 from werkzeug.utils import secure_filename
-from keras_timeseries_web.milk_timeseries_stateless_predictor import MilkStateless
-from keras_timeseries_web.milk_timeseries_stateful_predictor import MilkStateful
+from keras_timeseries.web.milk_timeseries_stateless_predictor import MilkStateless
+from keras_timeseries.web import MilkStateful
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])

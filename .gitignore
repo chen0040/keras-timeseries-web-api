@@ -8,7 +8,7 @@ __pycache__/
 
 .idea/
 target/
-keras_timeseries_web/uploads
+keras_timeseries/web/uploads
 *.iml
 
 

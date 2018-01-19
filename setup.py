@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name='keras_timeseries_web',
-    packages=['keras_timeseries_web'],
+    name='keras_timeseries',
+    packages=['keras_timeseries'],
     include_package_data=True,
     install_requires=[
         'flask',
