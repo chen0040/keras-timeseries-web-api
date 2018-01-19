@@ -3,4 +3,6 @@ keras
 numpy
 h5py
 tensorflow
-
+scikit-learn
+pandas
+celery
