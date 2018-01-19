@@ -42,9 +42,9 @@ class StatelessLSTM(object):
         scaler_file_path = StatelessLSTM.get_scaler_path(model_dir_path)
 
         self.model = model_from_json(
-            open(config_file_path, 'r').read())
+            open(architecture_file_path, 'r').read())
         self.model.load_weights(weight_file_path)
-        self.config = np.load(architecture_file_path).item()
+        self.config = np.load(config_file_path).item()
         self.scaler = pickle.load(
             open(scaler_file_path, 'rb'))
 
@@ -59,6 +59,16 @@ class StatelessLSTM(object):
         X = np.expand_dims(X, axis=2)
         Ypredict = self.model.predict(X)
         return Ypredict, Y
+
+    def predict(self, time_window):
+        time_window = self.scaler.transform(np.expand_dims(time_window, -1))
+        timesteps = self.config['timesteps']
+        X = np.zeros(shape=(1, timesteps))
+        X[0] = time_window[(len(time_window) - timesteps):].T
+        X = np.expand_dims(X, axis=2)
+        Ypredict = self.model.predict(X)
+        Ypredict = self.scaler.inverse_transform(Ypredict)[0][0]
+        return Ypredict
 
     def create_model(self, num_timesteps, hidden_units=None):
         if hidden_units is None:
@@ -160,9 +170,9 @@ class StatefulLSTM(object):
         scaler_file_path = StatefulLSTM.get_scaler_path(model_dir_path)
 
         self.model = model_from_json(
-            open(config_file_path, 'r').read())
+            open(architecture_file_path, 'r').read())
         self.model.load_weights(weight_file_path)
-        self.config = np.load(architecture_file_path).item()
+        self.config = np.load(config_file_path).item()
         self.scaler = pickle.load(
             open(scaler_file_path, 'rb'))
 
@@ -179,12 +189,13 @@ class StatefulLSTM(object):
         return Ypredict, Y
 
     def predict(self, time_window):
-        time_window = self.scaler.transform(time_window)
+        time_window = self.scaler.transform(np.expand_dims(time_window, -1))
         timesteps = self.config['timesteps']
         X = np.zeros(shape=(1, timesteps))
         X[0] = time_window[(len(time_window) - timesteps):].T
         X = np.expand_dims(X, axis=2)
         Ypredict = self.model.predict(X)
+        Ypredict = self.scaler.inverse_transform(Ypredict)[0][0]
         return Ypredict
 
     def create_model(self, num_timesteps, batch_size, hidden_units=None):
