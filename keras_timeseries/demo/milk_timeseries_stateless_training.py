@@ -12,6 +12,8 @@ print(dataframe.head())
 
 timeseries = dataframe.as_matrix(['MilkProduction']).T[0]
 
+print(timeseries)
+
 network = StatelessLSTM()
 
 network.fit(timeseries, model_dir_path=model_dir_path, num_timesteps=6)

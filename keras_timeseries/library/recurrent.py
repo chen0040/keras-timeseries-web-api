@@ -80,7 +80,8 @@ class StatelessLSTM(object):
         config_file_path = StatelessLSTM.get_config_path(model_dir_path)
 
         self.scaler = MinMaxScaler()
-        timeseries = self.scaler.fit_transform(timeseries)
+
+        timeseries = self.scaler.fit_transform(np.expand_dims(timeseries, axis=-1))
         pickle.dump(self.scaler, open(scaler_file_path, 'wb'))
 
         if num_timesteps is None:
@@ -177,12 +178,21 @@ class StatefulLSTM(object):
         Ypredict = self.model.predict(X)
         return Ypredict, Y
 
+    def predict(self, time_window):
+        time_window = self.scaler.transform(time_window)
+        timesteps = self.config['timesteps']
+        X = np.zeros(shape=(1, timesteps))
+        X[0] = time_window[(len(time_window) - timesteps):].T
+        X = np.expand_dims(X, axis=2)
+        Ypredict = self.model.predict(X)
+        return Ypredict
+
     def create_model(self, num_timesteps, batch_size, hidden_units=None):
         if hidden_units is None:
             hidden_units = 64
 
         model = Sequential()
-        model.add(LSTM(units=hidden_units, batch_input_shape=(BATCH_SIZE, num_timesteps, 1), return_sequences=False,
+        model.add(LSTM(units=hidden_units, batch_input_shape=(batch_size, num_timesteps, 1), return_sequences=False,
                        stateful=True))
         model.add(Dense(1))
 
@@ -191,14 +201,14 @@ class StatefulLSTM(object):
         print(model.summary())
         return model
 
-    def fit(self, timeseries, model_dir_path, batch_size, epochs=None, num_timesteps=None):
+    def fit(self, timeseries, model_dir_path, batch_size, epochs=None, num_timesteps=None, split_test_size=None):
         weight_file_path = StatefulLSTM.get_weight_path(model_dir_path)
         architecture_file_path = StatefulLSTM.get_architecture_path(model_dir_path)
         scaler_file_path = StatefulLSTM.get_scaler_path(model_dir_path)
         config_file_path = StatefulLSTM.get_config_path(model_dir_path)
 
         self.scaler = MinMaxScaler()
-        timeseries = self.scaler.fit_transform(timeseries)
+        timeseries = self.scaler.fit_transform(np.expand_dims(timeseries, axis=-1))
         pickle.dump(self.scaler, open(scaler_file_path, 'wb'))
 
         if num_timesteps is None:
@@ -207,6 +217,8 @@ class StatefulLSTM(object):
             batch_size = 12
         if epochs is None:
             epochs = 100
+        if split_test_size is None:
+            split_test_size = 0.2
 
         self.config = dict()
         self.config['timesteps'] = num_timesteps
@@ -216,26 +228,34 @@ class StatefulLSTM(object):
         self.config['batch_size'] = batch_size
         np.save(config_file_path, self.config)
 
-        self.model = self.create_model(num_timesteps)
+        self.model = self.create_model(num_timesteps=num_timesteps, batch_size=batch_size)
         with open(architecture_file_path, 'w') as file:
             file.write(self.model.to_json())
 
-        X = np.zeros(shape=(timeseries.shape[0] - num_timesteps - 1, num_timesteps))
-        Y = np.zeros(shape=(timeseries.shape[0] - num_timesteps - 1, 1))
+        ts_len = timeseries.shape[0]
+        X = np.zeros(shape=(ts_len - num_timesteps - 1, num_timesteps))
+        Y = np.zeros(shape=(ts_len - num_timesteps - 1, 1))
         for i in range(timeseries.shape[0] - num_timesteps - 1):
             X[i] = timeseries[i:i + num_timesteps].T
             Y[i] = timeseries[i + num_timesteps + 1]
 
         X = np.expand_dims(X, axis=2)
+        ts_len = X.shape[0]
 
-        Xtrain, Xtest, Ytrain, Ytest = train_test_split(X, Y, test_size=0.2)
+        split_len = int(ts_len * split_test_size)
+
+        Xtrain, Xtest, Ytrain, Ytest = X[split_len:], X[:split_len], Y[split_len:], Y[:split_len]
 
         # must be multiple of batch size
         trainSize = int(len(Xtrain) // batch_size)
         trainSize = trainSize * batch_size
+        Xtrain = Xtrain[:trainSize]
+        Ytrain = Ytrain[:trainSize]
 
         testSize = int(len(Xtest) // batch_size)
         testSize = testSize * batch_size
+        Xtest = Xtest[:testSize]
+        Ytest = Ytest[:testSize]
 
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model.fit(Xtrain, Ytrain, batch_size=batch_size, epochs=epochs, verbose=1,
