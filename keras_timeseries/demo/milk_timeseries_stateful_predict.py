@@ -21,7 +21,7 @@ network.load_model(model_dir_path=model_dir_path)
 
 timesteps = 6
 for i in range(timeseries.shape[0] - timesteps - 1):
-    X = timeseries[i:i + timesteps].T
+    X = timeseries[:i + timesteps].T
     predicted = network.predict(X)
     actual = timeseries[i + timesteps + 1]
     print('predicted: ' + str(predicted) + ' actual: ' + str(actual))

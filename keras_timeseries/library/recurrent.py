@@ -176,6 +176,9 @@ class StatefulLSTM(object):
         self.scaler = pickle.load(
             open(scaler_file_path, 'rb'))
 
+    def batch_size(self):
+        return self.config['batch_size']
+
     def evaluate(self, timeseries):
         timeseries = self.scaler.transform(timeseries)
         timesteps = self.config['timesteps']
@@ -191,8 +194,16 @@ class StatefulLSTM(object):
     def predict(self, time_window):
         time_window = self.scaler.transform(np.expand_dims(time_window, -1))
         timesteps = self.config['timesteps']
-        X = np.zeros(shape=(1, timesteps))
-        X[0] = time_window[(len(time_window) - timesteps):].T
+        batch_size = self.batch_size()
+        time_window_size = len(time_window)
+
+        if time_window_size < batch_size + timesteps:
+            return 0
+
+        X = np.zeros(shape=(batch_size, timesteps))
+        index = 0
+        for i in range(batch_size):
+            X[i] = time_window[time_window_size - batch_size + i - timesteps:time_window_size - batch_size + i].T
         X = np.expand_dims(X, axis=2)
         Ypredict = self.model.predict(X)
         Ypredict = self.scaler.inverse_transform(Ypredict)[0][0]
