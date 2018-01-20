@@ -27,8 +27,8 @@ for i in range(timeseries.shape[0] - timesteps - 1):
     X = timeseries[:i + timesteps].T
     predicted = network.predict(X)
     actual = timeseries[i + timesteps + 1]
-    actual = timeseries[i + timesteps + 1]
     predicted_list.append(predicted)
+    actual_list.append(actual)
     print('predicted: ' + str(predicted) + ' actual: ' + str(actual))
 
 plot_timeseries(actual_list, predicted_list, StatefulLSTM.model_name)

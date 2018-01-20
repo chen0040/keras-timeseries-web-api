@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-import numpy as np
 
 from keras_timeseries.library.plot_utils import plot_timeseries
 from keras_timeseries.library.recurrent import StatelessLSTM
