@@ -6,3 +6,4 @@ tensorflow
 scikit-learn
 pandas
 celery
+matplotlib
