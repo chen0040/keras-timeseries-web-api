@@ -5,26 +5,8 @@ from werkzeug.utils import secure_filename
 from keras_timeseries.library.recurrent import StatefulLSTM, StatelessLSTM
 import pandas as pd
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-
-def make_celery(app):
-    celery = Celery(app.import_name, backend=app.config['CELERY_RESULT_BACKEND'],
-                    broker=app.config['CELERY_BROKER_URL'])
-    celery.conf.update(app.config)
-    TaskBase = celery.Task
-
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
 
 app = Flask(__name__)  # create the application instance :)
 app.config.from_object(__name__)  # load config from this file , flaskr.py
@@ -35,7 +17,6 @@ app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
     CELERY_RESULT_BACKEND='redis://localhost:6379'
 )
-celery = make_celery(app)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 milkStateful = StatefulLSTM()
@@ -86,8 +67,8 @@ def milk_timeseries_stateful():
 
 
 def main():
-    data_dir_path = '../data'
-    model_dir_path = '../models/monthly-milk-production'
+    data_dir_path = '../demo/data'
+    model_dir_path = '../demo/models/monthly-milk-production'
     data_file_path = os.path.join(data_dir_path, 'monthly-milk-production-pounds-p.csv')
     dataframe = pd.read_csv(filepath_or_buffer=data_file_path, sep=',')
 
@@ -97,7 +78,7 @@ def main():
     timeseries = dataframe.as_matrix(['MilkProduction']).T[0][0:43]  # 36 is the multiple of the batch size
     # milkStateful.test_run()
     milkStateless.test_run(timeseries)
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
 
 
 if __name__ == '__main__':

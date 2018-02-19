@@ -1,21 +1,20 @@
-import pandas as pd
-import os
+import quandl
 
 from keras_timeseries.library.plot_utils import plot_timeseries
 from keras_timeseries.library.recurrent import StatelessLSTM
 
-data_dir_path = '../data'
-model_dir_path = '../models/monthly-milk-production'
+mydata = quandl.get("WIKI/MSFT")
+# mydata = quandl.get("WIKI/MSFT", returns="numpy")
 
-dataframe = pd.read_csv(filepath_or_buffer=os.path.join(data_dir_path, 'monthly-milk-production-pounds-p.csv'), sep=',')
+print(mydata.head())
 
-print(dataframe.head())
+timeseries = mydata.as_matrix(['Close']).T[0]
 
-timeseries = dataframe.as_matrix(['MilkProduction']).T[0]
-
-print(timeseries)
+print(timeseries.shape)
 
 network = StatelessLSTM()
+
+model_dir_path = './models/stocker'
 
 network.load_model(model_dir_path=model_dir_path)
 
@@ -31,7 +30,3 @@ for i in range(timeseries.shape[0] - timesteps - 1):
     print('predicted: ' + str(predicted) + ' actual: ' + str(actual))
 
 plot_timeseries(actual_list, predicted_list, StatelessLSTM.model_name)
-
-
-
-

@@ -8,7 +8,7 @@ The implementation the stateful and stateless recurrent network can be found in
 [keras_timeseries/library/recurrent.py](keras_timeseries/library/recurrent.py)
 
 The demo codes on how to use these recurrent networks can be found in the folder
-[keras_timeseries/demo](keras_timeseries/demo)
+[demo](demo)
 
 # Usage
 
@@ -22,8 +22,8 @@ import os
 from keras_timeseries.library.plot_utils import plot_timeseries
 from keras_timeseries.library.recurrent import StatelessLSTM
 
-data_dir_path = '../data'
-output_dir_path = '../models/monthly-milk-production'
+data_dir_path = './data'
+output_dir_path = './models/monthly-milk-production'
 
 dataframe = pd.read_csv(filepath_or_buffer=os.path.join(data_dir_path, 'monthly-milk-production-pounds-p.csv'), sep=',')
 
@@ -63,8 +63,8 @@ import os
 from keras_timeseries.library.plot_utils import plot_timeseries
 from keras_timeseries.library.recurrent import StatefulLSTM
 
-data_dir_path = '../data'
-model_dir_path = '../models/monthly-milk-production'
+data_dir_path = './data'
+model_dir_path = './models/monthly-milk-production'
 
 dataframe = pd.read_csv(filepath_or_buffer=os.path.join(data_dir_path, 'monthly-milk-production-pounds-p.csv'), sep=',')
 
@@ -102,7 +102,7 @@ Run the following command to install the keras, flask and other dependency modul
 sudo pip install -r requirements.txt
 ```
 
-Goto keras_timeseries/web directory and run the following command:
+Goto demo_web directory and run the following command:
 
 ```bash
 python flaskr.py
